@@ -1,7 +1,7 @@
-const GameBoard = (function () {
+const gameBoard = (function () {
     function createBoard() {
         function createCell() {
-            return { mark: "", lockMarkedCell: false }
+            return { mark: "", isCellAlreadyMarked: false }
         }
 
         function createRow() {
@@ -9,21 +9,44 @@ const GameBoard = (function () {
             return [createCell(), createCell(), createCell()]
         }
 
+        function createBoard() {
+            return [createRow(), createRow(), createRow()]
+        }
+
         // TODO update to for loop
-        const Board = [createRow(), createRow(), createRow()]
+        const board = createBoard()
 
         function getBoard() {
-            return Board
+            return board
         }
 
         function playerInput(rowNumber, columnNumber, mark) {
             // Mark is true or false
             // True is tick and false is cross
-            Board[rowNumber][columnNumber] = { mark, lockMarkedCell: true }
-            return checkForWinCondition(rowNumber, columnNumber)
+            const inputCell = getBoardCell(rowNumber, columnNumber)
+
+            if (isCellAlreadyMarked(inputCell)) return "Input Error: Cell Already Marked"
+            updateBoardCell(inputCell, mark)
+            if (isWinCondition(rowNumber, columnNumber)) return true
+
+            return false
         }
 
-        function checkForWinCondition(rowNumber, columnNumber) {
+        function getBoardCell(rowNumber, columnNumber) {
+            const board = getBoard()
+            return board[rowNumber][columnNumber]
+        }
+
+        function isCellAlreadyMarked(inputCell) {
+            return inputCell.isCellAlreadyMarked
+        }
+
+        function updateBoardCell(inputCell, mark) {
+            inputCell.mark = mark
+            inputCell.isCellAlreadyMarked = true
+        }
+
+        function isWinCondition(rowNumber, columnNumber) {
             // We only need to check for matchs in the input row and column
             if (isRowHasSameMarks(rowNumber)) {
                 return true
@@ -37,11 +60,13 @@ const GameBoard = (function () {
         }
 
         function isRowHasSameMarks(rowNumber) {
-            const FirstCell = Board[rowNumber][0]
-            for (cell of Board[rowNumber]) {
+            const board = getBoard()
+            const firstCell = board[rowNumber][0]
+
+            for (cell of board[rowNumber]) {
                 // We don't need to check for first cell
                 // But I'm lazy
-                if (cell.mark !== FirstCell.mark) {
+                if (cell.mark !== firstCell.mark) {
                     return false
                 }
             }
@@ -49,9 +74,11 @@ const GameBoard = (function () {
         }
 
         function isColumnHasSameMarks(columnNumber) {
-            const FirstCell = Board[0][columnNumber]
-            for (row of Board) {
-                if (row[columnNumber].mark !== FirstCell.mark) {
+            const board = getBoard()
+            const firstCell = board[0][columnNumber]
+
+            for (row of board) {
+                if (row[columnNumber].mark !== firstCell.mark) {
                     return false
                 }
             }
@@ -65,9 +92,22 @@ const GameBoard = (function () {
     return createBoard()
 })()
 
-console.log(GameBoard.playerInput(0, 1, true))
-console.log(GameBoard.playerInput(2, 1, true))
-console.log(GameBoard.playerInput(1, 1, true))
+const { player1, player2 } = (function () {
+    function createPlayer(name = "") {
+        const getName = () => name
+        const setName = (newName) => name = newName
+        return { name, getName, setName }
 
+    }
+    const player1 = createPlayer()
+    const player2 = createPlayer()
 
-console.log(GameBoard.getBoard())
+    return { player1, player2 }
+})()
+
+console.log(gameBoard.playerInput(1, 1, true))
+console.log(gameBoard.playerInput(0, 1, true))
+console.log(gameBoard.playerInput(1, 1, true))
+console.log(gameBoard.playerInput(2, 1, true))
+
+console.log(gameBoard.getBoard())
