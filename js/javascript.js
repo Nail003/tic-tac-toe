@@ -1,6 +1,6 @@
 const gameBoard = (function () {
     function createCell() {
-        return { mark: "", isCellAlreadyMarked: false }
+        return { mark: ".", isCellAlreadyMarked: false }
     }
 
     function createRow() {
@@ -13,7 +13,7 @@ const gameBoard = (function () {
     }
 
     // TODO update to for loop
-    const board = createBoard()
+    let board = createBoard()
 
     function getBoard() {
         return board
@@ -41,7 +41,7 @@ const gameBoard = (function () {
     }
 
     function updateBoardCell(inputCell, mark) {
-        inputCell.mark = mark
+        inputCell.mark = mark ? "X" : "T"
         inputCell.isCellAlreadyMarked = true
     }
 
@@ -84,31 +84,106 @@ const gameBoard = (function () {
         return true
     }
 
+    function resetBoard() {
+        board = createBoard()
+    }
 
-    return { getBoard, playerInput }
+
+    return { getBoard, playerInput, resetBoard }
 
 })()
 
 const { player1, player2 } = (function () {
-    function createPlayer(name = "") {
+    function createPlayer(name = "", active = false) {
         const getName = () => name
         const setName = (newName) => name = newName
-        return { name, getName, setName }
+        const setActive = () => active = true
+        const isActive = () => active
+        return { getName, setName, setActive, isActive }
 
     }
-    const player1 = createPlayer()
-    const player2 = createPlayer()
+    const player1 = createPlayer("Player 1", true)
+    const player2 = createPlayer("Player 2")
 
     return { player1, player2 }
 })()
 
 const gameMaster = (function () {
-    return {}
+    function start() {
+        render()
+    }
+
+    function playerInput(rowNumber, columnNumber, mark) {
+        const result = gameBoard.playerInput(rowNumber, columnNumber, mark)
+        if (typeof result === "string") {
+            console.log("Cell Already Marked")
+            return
+        }
+
+        if (result) {
+            re_render()
+            if (player1.isActive) {
+                console.log("Player 1 Won")
+            } else {
+                console.log("Player 2 Won")
+            }
+            gameBoard.resetBoard()
+        }
+
+        toggleActivePlayer()
+
+        re_render()
+
+    }
+
+    function render() {
+        // promptForPlayerNames()
+        welcomePlayer()
+        displayGameBoard()
+    }
+
+    function re_render() {
+        displayGameBoard()
+    }
+
+    function promptForPlayerNames() {
+        const player1Name = prompt("Player 1 Name?")
+        const player2Name = prompt("Player 2 Name?")
+        player1.setName(player1Name)
+        player2.setName(player2Name)
+    }
+
+    function welcomePlayer() {
+        console.log(`Welcome ${player1.getName()} and ${player2.getName()}`)
+    }
+
+    function displayGameBoard() {
+        const board = gameBoard.getBoard()
+        let displayBoardString = ""
+
+        console.log("---------")
+        for (let row of board) {
+            for (let cell of row) {
+                displayBoardString += ` ${cell.mark} `
+            }
+            displayBoardString += "\n"
+        }
+        console.log(displayBoardString)
+    }
+
+    function toggleActivePlayer() {
+        if (player1.isActive) {
+            player2.isActive = true
+            player1.isActive = false
+            return
+        }
+        player1.isActive = true
+        player2.isActive = false
+    }
+
+    return { start, playerInput }
 })()
 
-console.log(gameBoard.playerInput(1, 1, true))
-console.log(gameBoard.playerInput(0, 1, true))
-console.log(gameBoard.playerInput(1, 1, true))
-console.log(gameBoard.playerInput(2, 1, true))
+gameMaster.start()
 
-console.log(gameBoard.getBoard())
+
