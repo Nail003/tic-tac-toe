@@ -42,3 +42,7 @@ main div {
     color: var(--white);
     font-size: 4.5rem;
 }
+
+main div:hover {
+    background-color: darkcyan;
+}

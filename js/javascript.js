@@ -24,7 +24,7 @@ const gameBoard = (function () {
         // X is Player 1 and O is Player 2
         const inputCell = getBoardCell(rowNumber, columnNumber)
 
-        if (isCellAlreadyMarked(inputCell)) return "Input Error: Cell Already Marked"
+        if (isCellAlreadyMarked(inputCell)) return "Cell Already Marked"
 
         updateBoardCell(inputCell, mark)
 
@@ -161,17 +161,22 @@ const gameMaster = (function () {
     }
 
     function handleResult(result) {
-        if (result === "Draw") {
-            handleDrawMessage()
-            return
-        }
+        switch (result) {
+            case "Draw":
+                handleDrawMessage()
+                break;
 
-        if (result === "Won") {
-            handleWinMessage()
-            return
-        }
+            case "Won":
+                handleWinMessage()
+                break;
 
-        displayMessage("Box Already Marked")
+            case "Cell Already Marked":
+                handleCellAlreadyMarkedMessage()
+                break;
+
+            default:
+                break;
+        }
     }
 
     function handleDrawMessage() {
@@ -188,6 +193,10 @@ const gameMaster = (function () {
             displayMessage(`${player2.getName()} Won`)
         }
         gameEnded = true
+    }
+
+    function handleCellAlreadyMarkedMessage() {
+        displayMessage("Box Already Marked")
     }
 
     function render() {
