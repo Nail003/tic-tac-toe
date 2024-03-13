@@ -67,13 +67,9 @@ const gameBoard = (function () {
 
     function isWinCondition(rowNumber, columnNumber) {
         // We only need to check for matchs in the input row and column
-        if (isRowHasSameMarks(rowNumber)) {
-            return true
-        }
-
-        if (isColumnHasSameMarks(columnNumber)) {
-            return true
-        }
+        if (isRowHasSameMarks(rowNumber)) return true
+        if (isColumnHasSameMarks(columnNumber)) return true
+        if (isDiagonalHasSameMarks()) return true
 
         return false
     }
@@ -102,6 +98,16 @@ const gameBoard = (function () {
             }
         }
         return true
+    }
+
+    function isDiagonalHasSameMarks() {
+        const board = getBoard()
+        const topLeftDiagonalFlag = board[0][0].mark !== "" && board[0][0].mark === board[1][1].mark && board[1][1].mark === board[2][2].mark
+        const topRightDiagonalFlag = board[0][2].mark !== "" && board[0][2].mark === board[1][1].mark && board[1][1].mark === board[2][0].mark
+
+        if (topLeftDiagonalFlag) return true
+        if (topRightDiagonalFlag) return true
+        return false
     }
 
     function resetBoard() {
