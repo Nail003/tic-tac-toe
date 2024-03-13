@@ -9,6 +9,7 @@
     --darkBlue: #102a43;
     --white: #f0f4f8;
     --grey: darkslategrey;
+    --cyan: darkcyan;
     --cellSize: 128px;
     background-color: var(--grey);
 }
@@ -45,5 +46,5 @@ main div {
 }
 
 main div:hover {
-    background-color: darkcyan;
+    background-color: var(--cyan);
 }
