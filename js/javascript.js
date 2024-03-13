@@ -9,10 +9,10 @@ const gameBoard = (function () {
     }
 
     function createBoard() {
+        // TODO update to for loop
         return [createRow(), createRow(), createRow()]
     }
 
-    // TODO update to for loop
     let board = createBoard()
 
     function getBoard() {
@@ -20,13 +20,17 @@ const gameBoard = (function () {
     }
 
     function playerInput(rowNumber, columnNumber, mark) {
-        // Mark is true or false
-        // True is tick and false is cross
+        // Mark is X or O
+        // X is Player 1 and O is Player 2
         const inputCell = getBoardCell(rowNumber, columnNumber)
 
         if (isCellAlreadyMarked(inputCell)) return "Input Error: Cell Already Marked"
+
         updateBoardCell(inputCell, mark)
-        if (isWinCondition(rowNumber, columnNumber)) return true
+
+        if (isWinCondition(rowNumber, columnNumber)) return "Won"
+
+        if (isDraw()) return "Draw"
 
         return false
     }
@@ -43,6 +47,22 @@ const gameBoard = (function () {
     function updateBoardCell(inputCell, mark) {
         inputCell.mark = mark
         inputCell.isCellAlreadyMarked = true
+    }
+
+    function isDraw() {
+        return areAllCellMarked()
+    }
+
+    function areAllCellMarked() {
+        const board = getBoard()
+        for (let row of board) {
+            for (let cell of row) {
+                if (!cell.isCellAlreadyMarked) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     function isWinCondition(rowNumber, columnNumber) {
@@ -95,22 +115,27 @@ const gameBoard = (function () {
 
 const { player1, player2 } = (function () {
     function createPlayer(name = "", active = false, mark = "") {
+        let score = 0
         const getName = () => name
         const setName = (newName) => name = newName
         const setActive = () => active = true
         const isActive = () => active
         const getMark = () => mark
-        return { getName, setName, setActive, isActive, getMark }
+        const getScore = () => score
+        const setScore = (newScore) => score = newScore
+        return { getName, setName, setActive, isActive, getMark, getScore, setScore }
 
     }
-    const player1 = createPlayer("Player 1", true, "O")
-    const player2 = createPlayer("Player 2", false, "X")
+    const player1 = createPlayer("X", true, "X")
+    const player2 = createPlayer("O", false, "O")
 
     return { player1, player2 }
 })()
 
 const gameMaster = (function () {
     const main = document.querySelector("main")
+    const messageBox = document.querySelector("header").children[0]
+    let gameEnded = false
 
     function start() {
         render()
@@ -120,19 +145,13 @@ const gameMaster = (function () {
         const mark = getActivePlayer().getMark()
         const result = gameBoard.playerInput(rowNumber, columnNumber, mark)
 
-        if (typeof result === "string") {
-            console.log("Cell Already Marked")
+        if (gameEnded) {
+            resetGame()
             return
         }
 
         if (result) {
-            re_render()
-            if (player1.isActive) {
-                console.log("Player 1 Won")
-            } else {
-                console.log("Player 2 Won")
-            }
-            gameBoard.resetBoard()
+            handleResult(result)
             return
         }
 
@@ -141,12 +160,49 @@ const gameMaster = (function () {
 
     }
 
+    function handleResult(result) {
+        if (result === "Draw") {
+            handleDrawMessage()
+            return
+        }
+
+        if (result === "Won") {
+            handleWinMessage()
+            return
+        }
+
+        displayMessage("Box Already Marked")
+    }
+
+    function handleDrawMessage() {
+        displayMessage("Draw")
+        re_render()
+        gameEnded = true
+    }
+
+    function handleWinMessage() {
+        re_render()
+        if (player1.isActive) {
+            displayMessage(`${player1.getName()} Won`)
+        } else {
+            displayMessage(`${player2.getName()} Won`)
+        }
+        gameEnded = true
+    }
+
     function render() {
         displayCurrentGameBoard()
     }
 
     function re_render() {
         render()
+    }
+
+    function resetGame() {
+        gameBoard.resetBoard()
+        toggleActivePlayer()
+        re_render()
+        gameEnded = false
     }
 
     function displayCurrentGameBoard() {
@@ -185,13 +241,19 @@ const gameMaster = (function () {
         if (player1.isActive) {
             player2.isActive = true
             player1.isActive = false
+            displayMessage(`${player2.getName()} Turn`)
             return
         }
         player1.isActive = true
         player2.isActive = false
+        displayMessage(`${player1.getName()} Turn`)
     }
 
-    return { start, playerInput }
+    function displayMessage(message) {
+        messageBox.innerText = message
+    }
+
+    return { start }
 })()
 
 gameMaster.start()
