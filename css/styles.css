@@ -48,3 +48,16 @@ main div {
 main div:hover {
     background-color: var(--cyan);
 }
+
+.cell-marked {
+    background-color: var(--grey);
+    cursor: default;
+}
+
+.cell-marked:hover {
+    background-color: var(--grey);
+}
+
+.cell-winning {
+    background-color: var(--cyan);
+}

@@ -1,6 +1,6 @@
 const gameBoard = (function () {
     function createCell() {
-        return { mark: "", isCellAlreadyMarked: false }
+        return { mark: "", isCellAlreadyMarked: false, isWinningPair: false }
     }
 
     function createRow() {
@@ -78,13 +78,14 @@ const gameBoard = (function () {
         const board = getBoard()
         const firstCell = board[rowNumber][0]
 
-        for (cell of board[rowNumber]) {
+        for (const cell of board[rowNumber]) {
             // We don't need to check for first cell
             // But I'm lazy
             if (cell.mark !== firstCell.mark) {
                 return false
             }
         }
+        flagWinningRowPair(rowNumber)
         return true
     }
 
@@ -97,6 +98,7 @@ const gameBoard = (function () {
                 return false
             }
         }
+        flagWinningColumnPair(columnNumber)
         return true
     }
 
@@ -105,15 +107,45 @@ const gameBoard = (function () {
         const topLeftDiagonalFlag = board[0][0].mark !== "" && board[0][0].mark === board[1][1].mark && board[1][1].mark === board[2][2].mark
         const topRightDiagonalFlag = board[0][2].mark !== "" && board[0][2].mark === board[1][1].mark && board[1][1].mark === board[2][0].mark
 
-        if (topLeftDiagonalFlag) return true
-        if (topRightDiagonalFlag) return true
+        if (topLeftDiagonalFlag) {
+            flagWinningDiagonalTopLeft()
+            return true
+        }
+        if (topRightDiagonalFlag) {
+            flagWinningDiagonalTopRight()
+            return true
+        }
         return false
     }
+
+    function flagWinningRowPair(rowNumber) {
+        const board = getBoard()
+        for (const cell of board[rowNumber]) {
+            cell.isWinningPair = true
+        }
+    }
+
+    function flagWinningColumnPair(columnNumber) {
+        const board = getBoard()
+        for (row of board) {
+            row[columnNumber].isWinningPair = true
+        }
+    }
+
+    function flagWinningDiagonalTopLeft() {
+        const board = getBoard()
+        board[0][0].isWinningPair = board[1][1].isWinningPair = board[2][2].isWinningPair = true
+    }
+
+    function flagWinningDiagonalTopRight() {
+        const board = getBoard()
+        board[0][2].isWinningPair = board[1][1].isWinningPair = board[2][0].isWinningPair = true
+    }
+
 
     function resetBoard() {
         board = createBoard()
     }
-
 
     return { getBoard, playerInput, resetBoard }
 
@@ -234,6 +266,8 @@ const gameMaster = (function () {
 
                 div.innerText = cell.mark
                 div.dataset.coordinate = `${rowNumber}${columnNumber++}`
+                if (cell.isCellAlreadyMarked) div.classList = "cell-marked"
+                if (cell.isWinningPair) div.classList = "cell-winning"
                 div.addEventListener("click", onCellClick)
 
                 main.appendChild(div)
